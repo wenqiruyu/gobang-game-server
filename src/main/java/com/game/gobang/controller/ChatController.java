@@ -36,7 +36,7 @@ public class ChatController {
     public ResultVO pushToWeb(String message) {
 
         try {
-            WebSocketHandle.sendInfo(message);
+            WebSocketHandle.sendAllMessage(message);
         } catch (IOException e) {
             e.printStackTrace();
         }

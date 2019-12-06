@@ -21,20 +21,27 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component
 public class WebSocketHandle {
 
-    private  static  int COUNT = 0;
+    private static int COUNT = 0;
 
     private static CopyOnWriteArraySet<WebSocketHandle> websocket = new CopyOnWriteArraySet<WebSocketHandle>();
 
     private Session session;
-    /*
-    建立连接的时候调用
+
+    /**
+     * 建立socket连接时调用
+     *
+     * @param session
+     * @return void
+     * @author yingx
+     * @date 2019/12/6
      */
     @OnOpen
-    public  void onOpen(Session session){
+    public void onOpen(Session session) {
+
         this.session = session;
         websocket.add(this);
         addOnlineCount();
-        System.out.println("当前在线人数："+COUNT);
+        System.out.println("当前在线人数：" + COUNT);
         try {
             sendMessage("连接成功");
         } catch (IOException e) {
@@ -42,18 +49,35 @@ public class WebSocketHandle {
         }
     }
 
+    /**
+     * 用户关闭socket连接时调用
+     *
+     * @param
+     * @return void
+     * @author yingx
+     * @date 2019/12/6
+     */
     @OnClose
-    public void onclose(){
+    public void onClose() {
+
         websocket.remove(this);
         subOnlineCount();
         System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
     }
-    /*
-    接收到客户端的信息
+
+    /**
+     * 接收客户端的信息
+     *
+     * @param message
+     * @param session
+     * @return void
+     * @author yingx
+     * @date 2019/12/6
      */
     @OnMessage
-    public  void shoudaoMessage(String message, Session session){
-        System.out.println("server 收到的信息是：" +message);
+    public void onMessage(String message, Session session) {
+
+        System.out.println("server 收到的信息是：" + message);
         //群发消息
         for (WebSocketHandle item : websocket) {
             try {
@@ -66,24 +90,44 @@ public class WebSocketHandle {
 
     /**
      * 发生错误时调用
-     * */
+     *
+     * @param session
+     * @param error
+     * @return void
+     * @author yingx
+     * @date 2019/12/6
+     */
     @OnError
     public void onError(Session session, Throwable error) {
+
         System.out.println("发生错误");
         error.printStackTrace();
     }
 
-
+    /**
+     * 单人聊天
+     *
+     * @param message
+     * @return void
+     * @author yingx
+     * @date 2019/12/6
+     */
     public void sendMessage(String message) throws IOException {
+
         this.session.getBasicRemote().sendText(message);
-        //this.session.getAsyncRemote().sendText(message);
     }
 
 
     /**
-     * 群发自定义消息
-     * */
-    public static void sendInfo(String message) throws IOException {
+     * 群发自定义信息
+     *
+     * @param message
+     * @return void
+     * @author yingx
+     * @date 2019/12/6
+     */
+    public static void sendAllMessage(String message) throws IOException {
+
         for (WebSocketHandle item : websocket) {
             try {
                 item.sendMessage(message);
